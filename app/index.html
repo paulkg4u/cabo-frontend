@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width">
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+  <!-- build:css(.) styles/vendor.css -->
+  <!-- bower:css -->
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+  <!-- endbower -->
+  <!-- endbuild -->
+  <!-- build:css(.tmp) styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild -->
+</head>
+
+<body ng-app="caboFrontendApp">
+  <!--[if lte IE 8]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+  <!-- nav bar -->
+  <nav class="navbar navbar-fixed-top" role="navigation">
+    <!-- <a class="navbar-brand" href="/">Play Cabo</a> -->
+    <span class = "navbar-brand no-padding">
+      <a href="/">
+        <img class = "logo" src="/assets/img/logo.png" style="height:80px;">
+      </a>
+      
+    </span>
+  </nav>
+
+
+  <div class="container no-padding width-100">
+    <div ng-view=""></div>
+  </div>
+
+
+
+
+
+  <script>
+    window.fbAsyncInit = function () {
+      FB.init({
+        appId: '322113025051838',
+        cookie: true,
+        xfbml: true,
+        version: 'v3.2'
+      });
+
+      FB.AppEvents.logPageView();
+
+
+
+      FB.getLoginStatus(function (response) {
+        statusChangeCallback(response);
+        console.log(response);
+        console.log(FB);
+      });
+    };
+
+
+    (function (d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) { return; }
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    function statusChangeCallback(response) {
+      // The response object is returned with a status field that lets the
+      // app know the current login status of the person.
+      // Full docs on the response object can be found in the documentation
+      // for FB.getLoginStatus().
+      if (response.status === 'connected') {
+        // Logged into your app and Facebook.
+        FB.api('/me', function (response) {
+          console.log(response);
+          console.log('Successful login for: ' + response.name);
+        });
+      } else {
+        // The person is not logged into your app or we are unable to tell.
+        // document.getElementById('status').innerHTML = 'Please log ' +
+        //   'into this app.';
+      }
+    }
+  </script>
+
+  <script src="assets/js/firebase.js"></script>
+  <script>
+    // Initialize Firebase
+    var config = {
+      apiKey: "AIzaSyA5e_GeKgFDQJw8CW12qNHibyNIbRM5t24",
+      authDomain: "cabo-1cd87.firebaseapp.com",
+      databaseURL: "https://cabo-1cd87.firebaseio.com",
+      projectId: "cabo-1cd87",
+      storageBucket: "",
+      messagingSenderId: "338150241996"
+    };
+    firebase.initializeApp(config);
+  </script>
+  <!-- build:js(.) scripts/vendor.js -->
+  <!-- bower:js -->
+  <script src="bower_components/jquery/dist/jquery.js"></script>
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="bower_components/angular-animate/angular-animate.js"></script>
+  <script src="bower_components/angular-cookies/angular-cookies.js"></script>
+  <script src="bower_components/angular-resource/angular-resource.js"></script>
+  <script src="bower_components/angular-route/angular-route.js"></script>
+  <script src="bower_components/angular-sanitize/angular-sanitize.js"></script>
+  <script src="bower_components/angular-touch/angular-touch.js"></script>
+  <script src="bower_components/query-string/query-string.js"></script>
+  <script src="bower_components/angular-oauth2/dist/angular-oauth2.js"></script>
+  <script src="bower_components/ngstorage/ngStorage.js"></script>
+  <!-- endbower -->
+  <!-- endbuild -->
+
+  <!-- build:js({.tmp,app}) scripts/scripts.js -->
+  <script src="scripts/app.js"></script>
+  <script src="scripts/controllers/main.js"></script>
+  <script src="scripts/controllers/signin.js"></script>
+  <script src="scripts/controllers/gameroom.js"></script>
+
+  <!-- services -->
+  <script src="scripts/services/gameroomservice.js"></script>
+  <script src="scripts/services/playerprofileservice.js"></script>
+
+  <script src="scripts/controllers/privacy.js"></script>
+  <script src="scripts/controllers/howto.js"></script>
+  <!-- endbuild -->
+</body>
+
+</html>

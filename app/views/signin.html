@@ -1,0 +1,80 @@
+
+
+<div class="after-nav col-xs-12 col-sm-6 col-md-4 col-lg-4 col-md-offset-4 col-sm-offset-3 login-box">
+
+    <div class = "col-md-12 text-center welcome-text">
+            <img class = "logo" src="/assets/img/logo.png" style="height:120px;">  
+            <br>
+        <span class = "h4">
+                Hi, Welcome to play Cabo
+        </span>
+        
+        <br>
+        <span class = "h5">
+                Please sign in to start playing with your friends
+        </span>
+        
+    </div>
+    <div class = "col-md-12 no-padding">
+            <div class = "row" style = "margin-top:5px;">
+                    <div id = "fb-root"></div>
+                    <div class ="col-xs-12">
+                    <button id="facebookLogin" ng-click="login_fb()" class="col-md-12 btn btn-facebook">
+                        <span>Continue with Facebook</span>
+                    </button>
+                    </div>
+                </div>
+                <div class = "row" style = "margin-top:5px;">
+                    <div class = "col-md-12">
+                        <button type = "button" class = "col-md-12 btn btn-google" ng-click = "googleSignIn()">Continue with Google</button>
+                        <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                    </div>
+                </div>
+                <div class = "row" style = "margin-top:5px;">
+                        <div class = "col-md-12">
+                            <button type = "button" class = "col-md-12 btn btn-info" ng-click = "googleSignIn()">Continue as  Guest</button>
+                            <div class="g-signin2" data-onsuccess="onSignIn"></div>
+                        </div>
+                    </div>
+    </div>
+    
+</div>
+
+
+<style>
+    .login-box {
+    margin: auto;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 350px;
+    padding: 20px;
+    border: 5px solid #cea93f;
+    border-radius: 10px;
+    }
+
+    .btn-facebook {
+    background-color: #3b5998;
+    color: #fff;
+}
+
+.btn-google {
+    background-color: #DB4437;
+    color: #fff;
+}
+
+.welcome-text{
+        margin: 20px 0px;
+        color: white;
+        padding : 0px 10px;
+        height: 50%;
+    }
+
+.btn:hover{
+    color: white;
+    font-weight: bold;
+}
+
+</style>
