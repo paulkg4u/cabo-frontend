@@ -14,25 +14,26 @@ angular.module('caboFrontendApp')
 
     this.get_room_info = function(room_id){
       var deferred = $q.defer();
-      if(game_rooms.hasOwnProperty(room_id)){
-        deferred.resolve(game_rooms[room_id])
-      }else{
-        $http({
-          method : 'GET',
-          url : $rootScope.baseURL+'gameroom/gameroom',
-          params:{
-            'room_uuid': room_id
-          }
-        }).then(function successCallBack(response){
-          console.log(response);
-          game_rooms[response.data.room_number] = response.data;
-          deferred.resolve(response.data);
-        }, function errorCallBack(response){
-          console.log(response);
-          deferred.reject(false)
-        });
+      $http({
+        method : 'GET',
+        url : $rootScope.baseURL+'gameroom/gameroom/',
+        params:{
+          'room_uuid': room_id
+        }
+      }).then(function successCallBack(response){
+        console.log(response);
+        game_rooms[response.data.room_number] = response.data;
+        deferred.resolve(response.data);
+      }, function errorCallBack(response){
+        console.log(response);
+        deferred.reject(false)
+      });
+      // if(game_rooms.hasOwnProperty(room_id)){
+      //   deferred.resolve(game_rooms[room_id])
+      // }else{
+       
 
-      }
+      // }
 
       return deferred.promise;
     };

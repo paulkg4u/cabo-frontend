@@ -14,8 +14,10 @@ angular.module('caboFrontendApp')
     $scope.roomID = "";
     console.log(OAuth.isAuthenticated());
     if(OAuth.isAuthenticated() ==false){
+      console.log("not authenticated");
       $location.path("/signIn" );
     }else{
+      console.log("authenticated");
       $rootScope.isAuthenticated = true;
     }
     
@@ -51,6 +53,7 @@ angular.module('caboFrontendApp')
           'room_id' : $scope.roomID 
         }
       }).then(function successCallback(response){
+        console.log(response);
         $scope.data = response.data;
         $location.path('/gameroom/'+$scope.data.uuid);
       }, function errorCallback(error){

@@ -80,7 +80,7 @@
         // Logged into your app and Facebook.
         FB.api('/me', function (response) {
           console.log(response);
-          console.log('Successful login for: ' + response.name);
+          // console.log('Successful login for: ' + response.name);
         });
       } else {
         // The person is not logged into your app or we are unable to tell.
@@ -117,6 +117,7 @@
   <script src="bower_components/query-string/query-string.js"></script>
   <script src="bower_components/angular-oauth2/dist/angular-oauth2.js"></script>
   <script src="bower_components/ngstorage/ngStorage.js"></script>
+  <script src="assets/js/ui-bootstrap.min.js"></script>
   <!-- endbower -->
   <!-- endbuild -->
 

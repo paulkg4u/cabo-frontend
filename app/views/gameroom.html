@@ -1,113 +1,183 @@
-<div class="main-container">
+<div class="main-container" ng-contoller="GameroomCtrl">
     <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 height-100" style="padding: 10px;">
-            <div class="game-board">
-                    <div class  = "other-players">
-                            <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 height-100">
-                                    <div ng-repeat = "eachPlayer in otherPlayers" class = "each-board">
-                                            <div class = "col-md-2 height-100"></div>
-                                            <div class = "col-md-10 height-100">
-                                                    <div ng-repeat = "eachCard in playerCards" class = "remote-card"></div>
-                                                    
-                                            </div>
-                                                
-                                        </div>
-                            </div>
-                            
-                            <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 height-100 deck-panel">
-                                <div class = "col-sm-12 no-padding" style =  "height: 50%">
+        <div class="game-board">
+            <div class="other-players">
+                <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9 height-100">
+                    <div ng-repeat="eachPlayer in otherPlayers" class="each-board">
+                        <div class="col-md-2 height-100 text-center flex-container">
 
-                                </div>
-                                <div class = "col-sm-12 no-padding flex-container text-center" style =  "height: 50%">
-                                        
-                                    </div>
-                                
+                            <img class="other-player-pic" src="{{eachPlayer.pic_url}}" alt="">
+                            <span>{{eachPlayer.user.first_name}}</span>
+                        </div>
+                        <div class="col-md-10 height-100">
+                            <div ng-click = "eachPlayer.uuid = targetPlayer && selectCard(eachCard, $index)" ng-class = "{'clickable' : enableSelectingCard && eachPlayer.uuid == targetPlayer}" ng-hide="gameStatus == 'not_started'" ng-repeat="eachCard in playerStatus[eachPlayer.uuid].cards track by $index" class="remote-card">
+
                             </div>
-                            
-                            
-                            
-                                
-                                
+
                         </div>
-                    <div class = "my-board">
-                        <div class = "col-md-10 height-100 no-padding">
-                                <div class = "my-card" ng-repeat = "eachCard in playerCards"></div>
-                        </div>
-                        <div class = "col-md-2 height-100 flex-container">
-                            <button ng-show = "gameRoomData.statue == 'not_started'" class = "btn btn-primary" ng-click = "startGame()">Start Game</button>
-                        </div>
-                        
+
                     </div>
-                    
                 </div>
+
+                <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3 height-100 deck-panel">
+                    <div class="col-sm-12 no-padding flex-container" style="height: 50%">
+                        <div ng-hide="showPopedCard" ng-click="popCard()" class="card-on-deck">
+
+                        </div>
+                        <div ng-click="popCard()" ng-show="showPopedCard" class="card-on-deck">
+                            <img class="card-image" src="{{popedCard.image}}" alt="">
+                        </div>
+                    </div>
+                    <div class="col-sm-12 no-padding flex-container text-center" style="height: 50%">
+                        <div class="card-on-deck">
+                            <img ng-show = "lastPlayedCard" class = "card-image" src="{{lastPlayedCard.image}}">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="my-board">
+                <div class="col-md-10 height-100 no-padding">
+                    <div ng-hide="gameStatus == 'not_started'" ng-click = "selectCard(eachCard, $index)" ng-class = "{'clickable' : enableSelectingCard}" class="my-card" ng-repeat="eachCard in playerCards track by $index"></div>
+                </div>
+                <div class = "col-md-2 height-100 flex-container" ng-show =  "callCaboTimerRunnning">
+                    <button class="btn btn-primary" ng-click="skipCallCabo()">
+                        Skip
+                    </button>
+                    <button class="btn btn-primary" ng-click="callCabo()">
+                        Call Cabo
+                    </button>
+                </div>
+                <div class="col-md-2 height-100 flex-container" ng-hide = "callCaboTimerRunnning">
+                    <button ng-show="isPowerCard && popedCard" class="btn btn-primary" ng-click="useCard('usePower')">
+                        Use Power
+                    </button>
+                    <button ng-show="popedCard" class="btn btn-primary" ng-click="useCard('swap')">
+                        Swap Card
+                    </button>
+                    <button ng-show="popedCard" class="btn btn-primary" ng-click="useCard('throw')">
+                        Throw Away
+                    </button>
+                    <button ng-show="gameStatus == 'not_started' && isOwner" class="btn btn-primary" ng-click="startGame()">Start
+                        Game</button>
+                </div>
+
+            </div>
+
+        </div>
     </div>
-    
+
     <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 height-100">
-        
+
     </div>
-    
-    
+
+
 </div>
 
 <style>
-    .game-board{
+    .game-board {
         height: 100%;
         width: 100%;
         border: 5px solid #cea93f;
         border-radius: 5px;
         background-color: #3fce3fa1;
+        color: #ffffff;
     }
 
-    .other-players{
+    .other-players {
         height: 60%;
 
         width: 100%;
     }
 
-    .my-board{
+    .my-board {
         height: 40%;
         width: 100%;
         border-top: 3px solid white;
         padding: 10px 0px;
     }
 
-    .controls{
+    .controls {
         height: 10%;
         width: 100%;
     }
-    .deck-panel{
+
+    .deck-panel {
         border-left: 3px solid white;
     }
-    .each-board{
+
+    .each-board {
         height: 33%;
         float: left;
         width: 100%;
     }
-    .remote-card{
+
+    .remote-card {
         width: 12%;
-    height: 90%;
-    background-image: url(/assets/img/logo.png);
-    float: left;
-    border-radius: 10px;
-    background-color: #f5deb3;
-    background-position: center;
-    background-size: contain;
-    background-repeat: no-repeat;
-    border: 3px solid white;
-    margin: 1%;
+        height: 90%;
+        background-image: url(/assets/img/logo.png);
+        float: left;
+        border-radius: 10px;
+        background-color: #f5deb3;
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        border: 3px solid white;
+        margin: 1%;
     }
 
-    .my-card{
+    .card-on-deck {
+        width: 50%;
+        height: 90%;
+        background-image: url(/assets/img/logo.png);
+        float: left;
+        border-radius: 10px;
+        background-color: #f5deb3;
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+        border: 3px solid white;
+        margin: 1%;
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin: auto;
+    }
+
+    .my-card {
         width: 15%;
-    height: 100%;
-    background-image: url(/assets/img/logo.png);
-    float: left;
-    margin: 0px 5px;
-    border: 5px solid white;
-    border-radius: 10px;
-    background-color: #f5deb3;
-    background-position: center;
-    background-size: contain;
-    background-repeat: no-repeat;
+        height: 100%;
+        background-image: url(/assets/img/logo.png);
+        float: left;
+        margin: 0px 5px;
+        border: 5px solid white;
+        border-radius: 10px;
+        background-color: #f5deb3;
+        background-position: center;
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+
+    .other-player-pic {
+        height: 50px;
+        border-radius: 50%;
+        display: block;
+
+        margin-left: auto;
+
+        margin-right: auto;
+    }
+
+    .card-image {
+        height: 100%;
+        width: 100%;
+    }
+
+    .my-board .flex-container button {
+        margin: 10px 0px;
+    }
+
+    .clickable{ 
+        cursor: pointer;
     }
 </style>
-

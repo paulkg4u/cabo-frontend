@@ -41,35 +41,7 @@ angular.module('caboFrontendApp')
       }).then(function successCallback(response) {
           $rootScope.$storage.fbLogin = true;
           OAuthToken.setToken(response.data);
-          
           $location.path('/');
-          // UserService.getUser().then(function (result) {
-          //     if (result !== 'service_running') {
-          //         UserProfile.put(result);
-          //         switch (UserProfile.getRole()) {
-          //             case 'student':
-          //                 $state.go('student.dashboard');
-          //                 break;
-          //             case 'teacher':
-          //                 $state.go('teacher.dashboard').then(function () {
-          //                     $rootScope.loadSpinner = false;
-          //                 });
-          //                 break;
-          //             case 'administrator':
-          //                 $state.go('admin.dashboard').then(function () {
-          //                     $rootScope.loadSpinner = false;
-          //                 });
-          //                 break;
-          //             default:
-          //                 $rootScope.showMessage(false, 'Error!!');
-          //         }
-          //     }
-
-          // }, function (response) {
-          //     console.log(response);
-          //     $rootScope.loadSpinner = false;
-          //     $rootScope.showMessage(false, 'Error getting Token Owner!!');
-          // });
       }, function errorCallback(response) {
           console.log(response);
           $rootScope.loadSpinner = false;
