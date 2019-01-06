@@ -14,6 +14,7 @@ angular.module('caboFrontendApp')
     $scope.isOwner = false;
     $scope.showPopedCard = false;
     $scope.applying_board = false;
+    $scope.showFirstCards = false;
     PlayerProfileService.getPlayerProfile().then(function successCallBack(response) {
       $scope.player = response;
       if ($scope.player) {
@@ -50,29 +51,35 @@ angular.module('caboFrontendApp')
       $scope.gameStatus = board_data.game_status;
       if($scope.gameStatus == 'cabo_called' && $scope.playerStatus.last_chance){
         $scope.findWinner();
-      }else{
+      }else if ($scope.gameStatus == 'waiting_for_ready' || $scope.gameStatus == 'game_started'){
+        console.log($scope.playerStatus);
         $scope.playedCards = board_data.played_cards;
-      $scope.playerOrder = board_data.player_order;
-      if ($scope.playedCards[$scope.playedCards.length - 1] != 'XX') {
-        $scope.lastPlayedCard = $rootScope.cards[$scope.playedCards[$scope.playedCards.length - 1]];
-      }
-      $scope.myStatus = $scope.playerStatus[$scope.player.uuid];
-      delete ($scope.playerStatus[$scope.player.uuid]);
-      delete ($scope.playerInfo[$scope.player.uuid]);
-      $scope.otherPlayers = $scope.playerInfo;
-      $scope.currentPlayer = board_data.current_player;
-      if ($scope.gameRoomData.owner == $scope.player.uuid) {
-        $scope.isOwner = true;
-      } else {
-        $scope.isOwner = false;
-      }
-      $scope.applying_board = false;
-      
-      if($scope.currentPlayer == $scope.player.uuid){
-        $scope.myChance = true;
-      }
-      $rootScope.$apply();
-      }
+        $scope.playerOrder = board_data.player_order;
+        if ($scope.playedCards[$scope.playedCards.length - 1] != 'XX') {
+          $scope.lastPlayedCard = $rootScope.cards[$scope.playedCards[$scope.playedCards.length - 1]];
+        }
+        $scope.myStatus = $scope.playerStatus[$scope.player.uuid];
+        if($scope.myStatus.initial_cards_viewed <2){
+          $scope.viewFirstCards = true;
+        }else{
+          $scope.viewFirstCards = false;
+        }
+        delete ($scope.playerStatus[$scope.player.uuid]);
+        delete ($scope.playerInfo[$scope.player.uuid]);
+        $scope.otherPlayers = $scope.playerInfo;
+        $scope.currentPlayer = board_data.current_player;
+        console.log($scope.viewFirstCards);
+        if ($scope.gameRoomData.owner == $scope.player.uuid) {
+          $scope.isOwner = true;
+        } else {
+          $scope.isOwner = false;
+        }
+        $scope.applying_board = false;
+        if($scope.currentPlayer == $scope.player.uuid && $scope.gameStatus == 'game_started'){
+          $scope.myChance = true;
+        }
+        $rootScope.$apply();
+        }
       
     }
 
@@ -102,9 +109,6 @@ angular.module('caboFrontendApp')
           } else {
             $scope.isPowerCard = false;
           }
-
-          console.log($scope.firebase);
-          console.log($scope.cardsOnDeck);
           $scope.firebase.update({ 'cards_on_deck': $scope.cardsOnDeck });
         } else {
           $scope.showPopedCard = false;
@@ -166,62 +170,101 @@ angular.module('caboFrontendApp')
 
     $scope.selectCard = function (selectedCard, cardPosition = null) {
       $scope.enableSelectingCard = false;
-      if ($scope.actionOnSelect == 'swap') {
-        $scope.playedCards.push(selectedCard);
-        $scope.updates = { 'played_cards': $scope.playedCards };
-        $scope.updates['player_status/' + $scope.player.uuid + '/cards'] = $scope.playerCards;
-        $scope.runCallCaboTimer($scope.findNextPlayer());
-        $scope.playerCards[cardPosition] = $scope.popedCard.code;
-        console.log($scope.updates);
 
+      if($scope.viewFirstCards == true){
+        $scope.myStatus.initial_cards_viewed+=1;
+        var cardModal = $uibModal.open({
+          animation : true,
+          templateUrl: '/views/components/showCardModal.html',
+            controller: 'showCardModalCtrl',
+            size: 'sm',
+            resolve: {
+              selectedCard: function () {
+                return selectedCard;
+              }
+            }
+        });
+        $scope.updates = {};
+        $scope.updates['player_status/' + $scope.player.uuid + '/initial_cards_viewed'] = $scope.myStatus.initial_cards_viewed;
         $scope.firebase.update($scope.updates);
-        $scope.popedCard = null;
-        $scope.showPopedCard = false;
-      } else if ($scope.actionOnSelect == 'see_mine') {
-        var cardModal = $uibModal.open({
-          animation: true,
-          templateUrl: '/views/components/showCardModal.html',
-          controller: 'showCardModalCtrl',
-          size: 'sm',
-          resolve: {
-            selectedCard: function () {
-              return selectedCard;
+        if($scope.myStatus.initial_cards_viewed == 2){
+          $scope.viewFirstCards = false;
+          
+          if($scope.gameStatus == 'waiting_for_ready'){
+            var update_flag = false;
+            for(var each_uuid in $scope.playerStatus){
+              if($scope.playerStatus[each].initial_cards_viewed < 2){
+                $scope.update_flag = false;
+              }
+            }
+            if($scope.update_flag){
+              $scope.updates = {};
+              $scope.updates['game_status'] = 'started'
+              $scope.firebase.update($scope.updates);
             }
           }
-        });
-        $scope.runCallCaboTimer($scope.findNextPlayer());
-      } else if ($scope.actionOnSelect == 'see_others') {
-        var cardModal = $uibModal.open({
-          animation: true,
-          templateUrl: '/views/components/showCardModal.html',
-          controller: 'showCardModalCtrl',
-          size: 'sm',
-          resolve: {
-            selectedCard: function () {
-              return selectedCard;
-            }
-          }
-        });
-        $scope.runCallCaboTimer($scope.targetPlayer);
-        $scope.targetPlayer = null;
-      }else if ($scope.actionOnSelect == 'add_for_exchange'){
-        if($scope.cards_to_swap.length == 0){
-          $scope.cards_to_swap.push(selectedCard);
-          $scope.positions_to_swap.push(cardPosition);
-        }else if($scope.cards_to_swap.length == 1){
-          $scope.cards_to_swap.push(selectedCard);
-          $scope.positions_to_swap.push(cardPosition);
-          console.log($scope.cards_to_swap);
-          $scope.playerCards[$scope.positions_to_swap[0]] = $scope.cards_to_swap[1];
-          $scope.playerStatus[$scope.targetPlayer].cards[$scope.positions_to_swap[1]] = $scope.cards_to_swap[0];
-          $scope.updates = {};
-          $scope.updates['player_status/' + $scope.player.uuid + '/cards'] = $scope.playerCards;
-          $scope.updates['player_status/' + $scope.targetPlayer + '/cards'] =  $scope.playerStatus[$scope.targetPlayer].cards;
-          $scope.runCallCaboTimer($scope.targetPlayer);
-          $scope.firebase.update($scope.updates);
+        }
 
+
+      }else{
+        if ($scope.actionOnSelect == 'swap') {
+          $scope.playedCards.push(selectedCard);
+          $scope.updates = { 'played_cards': $scope.playedCards };
+          $scope.updates['player_status/' + $scope.player.uuid + '/cards'] = $scope.playerCards;
+          $scope.runCallCaboTimer($scope.findNextPlayer());
+          $scope.playerCards[cardPosition] = $scope.popedCard.code;
+          
+  
+          $scope.firebase.update($scope.updates);
+          $scope.popedCard = null;
+          $scope.showPopedCard = false;
+        } else if ($scope.actionOnSelect == 'see_mine') {
+          var cardModal = $uibModal.open({
+            animation: true,
+            templateUrl: '/views/components/showCardModal.html',
+            controller: 'showCardModalCtrl',
+            size: 'sm',
+            resolve: {
+              selectedCard: function () {
+                return selectedCard;
+              }
+            }
+          });
+          $scope.runCallCaboTimer($scope.findNextPlayer());
+        } else if ($scope.actionOnSelect == 'see_others') {
+          var cardModal = $uibModal.open({
+            animation: true,
+            templateUrl: '/views/components/showCardModal.html',
+            controller: 'showCardModalCtrl',
+            size: 'sm',
+            resolve: {
+              selectedCard: function () {
+                return selectedCard;
+              }
+            }
+          });
+          $scope.runCallCaboTimer($scope.targetPlayer);
+          $scope.targetPlayer = null;
+        }else if ($scope.actionOnSelect == 'add_for_exchange'){
+          if($scope.cards_to_swap.length == 0){
+            $scope.cards_to_swap.push(selectedCard);
+            $scope.positions_to_swap.push(cardPosition);
+          }else if($scope.cards_to_swap.length == 1){
+            $scope.cards_to_swap.push(selectedCard);
+            $scope.positions_to_swap.push(cardPosition);
+            console.log($scope.cards_to_swap);
+            $scope.playerCards[$scope.positions_to_swap[0]] = $scope.cards_to_swap[1];
+            $scope.playerStatus[$scope.targetPlayer].cards[$scope.positions_to_swap[1]] = $scope.cards_to_swap[0];
+            $scope.updates = {};
+            $scope.updates['player_status/' + $scope.player.uuid + '/cards'] = $scope.playerCards;
+            $scope.updates['player_status/' + $scope.targetPlayer + '/cards'] =  $scope.playerStatus[$scope.targetPlayer].cards;
+            $scope.runCallCaboTimer($scope.targetPlayer);
+            $scope.firebase.update($scope.updates);
+  
+          }
         }
       }
+      
     };
 
     $scope.useCard = function (actionName) {
