@@ -8,13 +8,22 @@
  * Controller of the caboFrontendApp
  */
 angular.module('caboFrontendApp')
-  .controller('GameroomCtrl', function ($scope, $rootScope, $routeParams, GameRoomService, PlayerProfileService, $http, $uibModal, $timeout) {
+  .controller('GameroomCtrl', function ($scope, $rootScope, $routeParams, GameRoomService, PlayerProfileService, $http, $uibModal, $timeout, $location) {
     $scope.player = null;
     $scope.gameStatus = "";
     $scope.isOwner = false;
     $scope.showPopedCard = false;
     $scope.applying_board = false;
     $scope.showFirstCards = false;
+    $scope.myChance = false;
+    $scope.gameStatusDict = {
+      'waiting_for_ready':"View Initial Cards",
+      'game_started' :  "Game Started",
+      'not_started' : "Waiting For Players",
+      'cabo_called' : "Cabo Called",
+      'your_chance' : "Your Status",
+      'completed' : 'Game Over'
+    };
     PlayerProfileService.getPlayerProfile().then(function successCallBack(response) {
       $scope.player = response;
       if ($scope.player) {
@@ -38,7 +47,7 @@ angular.module('caboFrontendApp')
 
         });
       }, function errorCallBack(error) {
-        console.log(error);
+
       });
     }
 
@@ -46,15 +55,42 @@ angular.module('caboFrontendApp')
       
       $scope.playerCards = board_data.player_status[$scope.player.uuid].cards;
       $scope.playerInfo = board_data.player_info;
+      $scope.playerList = angular.copy($scope.playerInfo);
       $scope.playerStatus = board_data.player_status;
       $scope.cardsOnDeck = board_data.cards_on_deck;
+      $scope.currentPlayer = board_data.current_player;
       $scope.gameStatus = board_data.game_status;
-      if($scope.gameStatus == 'cabo_called' && $scope.playerStatus.last_chance){
+
+      if(($scope.cardsOnDeck == undefined || $scope.cardsOnDeck.length == 0) && $scope.gameStatus == 'game__started'){
+        console.log("finding winner");
         $scope.findWinner();
-      }else if ($scope.gameStatus == 'waiting_for_ready' || $scope.gameStatus == 'game_started'){
-        console.log($scope.playerStatus);
+      }
+      if($scope.gameStatus == 'completed'){
+        console.log("game completed");
+        var scoreCardModal = $uibModal.open({
+          animation : true,
+          templateUrl: '/views/components/scoreCardModal.html',
+            controller: 'scoreCardModalCtrl',
+            size: 'score',
+            resolve: {
+              playerInfo: function () {
+                return $scope.playerInfo;
+              }
+            }
+        });
+
+        scoreCardModal.result.then(function(){
+          $location.path("/");
+        }, function(){
+          $location.path("/");
+        });
+      }else if($scope.gameStatus == 'cabo_called' && $scope.playerStatus[$scope.player.uuid].last_chance && $scope.currentPlayer == $scope.player.uuid){
+        console.log("finding winner");
+        $scope.findWinner();
+      }else{
         $scope.playedCards = board_data.played_cards;
         $scope.playerOrder = board_data.player_order;
+        
         if ($scope.playedCards[$scope.playedCards.length - 1] != 'XX') {
           $scope.lastPlayedCard = $rootScope.cards[$scope.playedCards[$scope.playedCards.length - 1]];
         }
@@ -67,19 +103,20 @@ angular.module('caboFrontendApp')
         delete ($scope.playerStatus[$scope.player.uuid]);
         delete ($scope.playerInfo[$scope.player.uuid]);
         $scope.otherPlayers = $scope.playerInfo;
-        $scope.currentPlayer = board_data.current_player;
-        console.log($scope.viewFirstCards);
+        if($scope.currentPlayer){
+          $scope.currentPlayerInfo = $scope.playerList[$scope.currentPlayer].user;
+        }
         if ($scope.gameRoomData.owner == $scope.player.uuid) {
           $scope.isOwner = true;
         } else {
           $scope.isOwner = false;
         }
         $scope.applying_board = false;
-        if($scope.currentPlayer == $scope.player.uuid && $scope.gameStatus == 'game_started'){
+        if($scope.currentPlayer == $scope.player.uuid && $scope.gameStatus == 'game_started' || $scope.gameStatus == 'cabo_called'){
           $scope.myChance = true;
         }
-        $rootScope.$apply();
-        }
+        $scope.$apply();
+      }
       
     }
 
@@ -99,7 +136,7 @@ angular.module('caboFrontendApp')
 
     
     $scope.popCard = function () {
-      if ($scope.currentPlayer == $scope.player.uuid) {
+      if ($scope.currentPlayer == $scope.player.uuid && $scope.myChance) {
         if($scope.popedCard == null) {
           $scope.popedCard = $rootScope.cards[$scope.cardsOnDeck.pop()];
           $scope.showPopedCard = true;
@@ -111,11 +148,8 @@ angular.module('caboFrontendApp')
           }
           $scope.firebase.update({ 'cards_on_deck': $scope.cardsOnDeck });
         } else {
-          $scope.showPopedCard = false;
-          $scope.popedCard = null;
+          // $scope.showPopedCard = false;
         }
-      }else{
-        console.log("not your chance");
       }
 
     };
@@ -172,6 +206,7 @@ angular.module('caboFrontendApp')
       $scope.enableSelectingCard = false;
 
       if($scope.viewFirstCards == true){
+        console.log("viewing initial cards")
         $scope.myStatus.initial_cards_viewed+=1;
         var cardModal = $uibModal.open({
           animation : true,
@@ -186,26 +221,28 @@ angular.module('caboFrontendApp')
         });
         $scope.updates = {};
         $scope.updates['player_status/' + $scope.player.uuid + '/initial_cards_viewed'] = $scope.myStatus.initial_cards_viewed;
-        $scope.firebase.update($scope.updates);
+        console.log($scope.myStatus)
         if($scope.myStatus.initial_cards_viewed == 2){
           $scope.viewFirstCards = false;
           
+          console.log($scope.playerStatus);
           if($scope.gameStatus == 'waiting_for_ready'){
-            var update_flag = false;
+            var update_flag = true;
             for(var each_uuid in $scope.playerStatus){
-              if($scope.playerStatus[each].initial_cards_viewed < 2){
-                $scope.update_flag = false;
+              if($scope.playerStatus[each_uuid].initial_cards_viewed < 2){
+                console.log("is false");
+                update_flag = false;
               }
             }
-            if($scope.update_flag){
-              $scope.updates = {};
-              $scope.updates['game_status'] = 'started'
+            console.log($scope.update_flag);
+            if(update_flag){
+              console.log("updating flag");
+              $scope.updates['game_status'] = 'game_started';
               $scope.firebase.update($scope.updates);
             }
           }
         }
-
-
+        $scope.firebase.update($scope.updates);
       }else{
         if ($scope.actionOnSelect == 'swap') {
           $scope.playedCards.push(selectedCard);
@@ -232,6 +269,8 @@ angular.module('caboFrontendApp')
           });
           $scope.runCallCaboTimer($scope.findNextPlayer());
         } else if ($scope.actionOnSelect == 'see_others') {
+          $scope.runCallCaboTimer($scope.targetPlayer);
+          $scope.targetPlayer = null;
           var cardModal = $uibModal.open({
             animation: true,
             templateUrl: '/views/components/showCardModal.html',
@@ -243,8 +282,6 @@ angular.module('caboFrontendApp')
               }
             }
           });
-          $scope.runCallCaboTimer($scope.targetPlayer);
-          $scope.targetPlayer = null;
         }else if ($scope.actionOnSelect == 'add_for_exchange'){
           if($scope.cards_to_swap.length == 0){
             $scope.cards_to_swap.push(selectedCard);
@@ -291,29 +328,40 @@ angular.module('caboFrontendApp')
     $scope.callCabo = function(){
       $scope.callCaboTimerRunnning = false;
       $scope.updates  = {'game_status' : 'cabo_called'};
+      $scope.updates['current_player'] = $scope.findNextPlayer();
       $scope.updates['player_status/' + $scope.player.uuid + '/last_chance'] = true;
+      console.log($scope.updates);
       $scope.firebase.update($scope.updates);
     };
 
     $scope.skipCallCabo = function(){
       $scope.callCaboTimerRunnning = false;
-      $scope.updateCurrentPlayer(nextPlayer);
+      $scope.updateCurrentPlayer($scope.findNextPlayer());
     };
 
     $scope.updateCurrentPlayer = function(player_uuid){
       $scope.updates = {'current_player':player_uuid};
+      if($scope.gameStatus == 'cabo_called' && $scope.myStatus.last_chance == false){
+        $scope.updates['player_status/' + $scope.player.uuid + '/last_chance'] = true;
+      }
       $scope.firebase.update($scope.updates);
     };
 
     $scope.runCallCaboTimer = function(nextPlayer){
       $scope.nextPlayer = nextPlayer;
       $scope.callCaboTimerRunnning = true;
-      $timeout(function(){
-        if($scope.callCaboTimerRunnning){
-          $scope.callCaboTimerRunnning = false;
-          $scope.updateCurrentPlayer(nextPlayer);
-        }
-      }, 5000);
+      if($scope.gameStatus == 'cabo_called'){
+        $scope.callCaboTimerRunnning = false;
+            $scope.updateCurrentPlayer(nextPlayer);
+      }else{
+        $timeout(function(){
+          if($scope.callCaboTimerRunnning){
+            $scope.callCaboTimerRunnning = false;
+            $scope.updateCurrentPlayer(nextPlayer);
+          }
+        }, 5000);
+      }
+      
     }
   });
 

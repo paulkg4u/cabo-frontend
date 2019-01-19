@@ -10,7 +10,7 @@
                             <span>{{eachPlayer.user.first_name}}</span>
                         </div>
                         <div class="col-md-10 height-100">
-                            <div ng-click = "eachPlayer.uuid = targetPlayer && selectCard(eachCard, $index)" 
+                            <div ng-click = "eachPlayer.uuid == targetPlayer && selectCard(eachCard, $index)" 
                             ng-class = "{'clickable' : enableSelectingCard && eachPlayer.uuid == targetPlayer}" 
                             ng-hide="gameStatus == 'not_started'" ng-repeat="eachCard in playerStatus[eachPlayer.uuid].cards track by $index" 
                             class="remote-card">
@@ -70,7 +70,48 @@
     </div>
 
     <div class="col-xs-12 col-sm-12 col-md-3 col-lg-3 height-100">
+        <div class= "col-xs-12 game-info-container">
+            <div class="col-xs-12 text-center text-bold">
+                Game Info
+            </div>
+            <div class="col-xs-12 no-padding">
+                <span class = "text-left">Room ID :</span> <span class = "text-right">{{gameRoomData.room_number}}</span>
+                <br>
+                <span class = "text-left">Status : </span> 
+                <span class = "text-right">{{gameStatusDict[gameStatus]}}</span>
+                <span ng-if= "gameStatus == 'waiting_for_ready' && myChance" class = "text-right">Your Turn</span>
+                <br>
+                <span class = "text-left" ng-if="gameStatus == 'game_started' || gameStatus == 'cabo_called'">Current Player</span>
+                <span class = "text-right" ng-if="gameStatus == 'game_started' || gameStatus == 'cabo_called'">
+                    {{currentPlayerInfo.first_name}}
+                </span>
+            </div>
+            <div class="col-xs-12 text-center text-bold new-section">
+                    Players
+            </div>
+            <div class = "col-xs-12">
 
+                    <div class = "row text-bold">
+                        <span class = "text-left">Name</span>
+                        <span class = "text-right">Score</span>
+                    </div>
+                    <div class = "row" ng-repeat = "eachPlayer in playerList">
+                        <span class = "text-left">
+                                {{eachPlayer.user.first_name}} {{eachPlayer.user.last_name}}
+                        </span>
+                        <span class = "text-right">
+                                {{eachPlayer.points}}
+                        </span>
+                            
+                    </div>
+                </div>
+
+            <div class="col-xs-12 text-center new-section">
+                Events
+            </div>
+            <div class = "col-xs-12"></div>
+        </div>
+        
     </div>
 
 
@@ -181,5 +222,31 @@
 
     .clickable{ 
         cursor: pointer;
+    }
+
+    .game-info-container{
+        margin-top: 10px;
+        border: 5px solid #cea93f;
+        border-radius: 5px;
+        background-color: #3fce3fa1;
+        color: #ffffff;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .text-bold{
+        font-weight: bold;
+    }
+    .text-left{
+        float: left;
+    }
+
+    .text-right{
+        float: right;
+    }
+
+
+    .new-section{
+        margin-top:20px
     }
 </style>
