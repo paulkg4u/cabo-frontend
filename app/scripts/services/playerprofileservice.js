@@ -18,7 +18,10 @@ angular.module('caboFrontendApp')
         url : $rootScope.baseURL+'player/player/',
       }).then(function successCallback(response){
         playerProfile =  response.data;
+        $rootScope.player = playerProfile;
+        console.log($rootScope.player);
         deferred.resolve(response.data);
+        $rootScope.isAuthenticated = true;
       }, function errorCallback(error){
         deferred.reject(error)
         OAuth.getRefreshToken().then(function(response){
@@ -36,5 +39,11 @@ angular.module('caboFrontendApp')
         
       // }
       return deferred.promise;
-    }
+    };
+
+    this.clearProfile = function(){
+      playerProfile = null;
+      $rootScope.player = null;
+    };
+
   });

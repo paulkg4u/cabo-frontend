@@ -1,3 +1,17 @@
+
+<nav class="navbar navbar-fixed-top" role="navigation">
+        <!-- <a class="navbar-brand" href="/">Play Cabo</a> -->
+        <span class="navbar-brand no-padding">
+            <a href="/">
+                <img class="logo" src="/assets/img/logo.png" style="height:80px;">
+            </a>
+    
+        </span>
+        <ul ng-show="isAuthenticated == true" class="nav navbar-nav navbar-right custom-navbar">
+            <li><span class="btn">{{player.user.first_name}}</span> </li>
+            <li><span ng-click="signOut()" class="btn"> Sign Out</span></li>
+        </ul>
+    </nav>
 <div class="main-container" ng-contoller="GameroomCtrl">
     <div class="col-xs-12 col-sm-12 col-md-9 col-lg-9 height-100" style="padding: 10px;">
         <div class="game-board">
@@ -39,6 +53,9 @@
                 </div>
             </div>
             <div class="my-board">
+                <div class = "col-xs-12 progress-bar-container">
+                        <uib-progressbar class = "custom-progress-bar" max="15000" value="secondsRemaining" ></uib-progressbar>
+                </div>
                 <div class="col-md-10 height-100 no-padding">
                     <div ng-hide="gameStatus == 'not_started'" ng-click = "selectCard(eachCard, $index)" ng-class = "{'clickable' : enableSelectingCard || viewFirstCards}" class="my-card" ng-repeat="eachCard in playerCards track by $index"></div>
                 </div>
@@ -137,7 +154,7 @@
         height: 40%;
         width: 100%;
         border-top: 3px solid white;
-        padding: 10px 0px;
+        padding: 5px 0px 15px 0px;
     }
 
     .controls {
@@ -249,4 +266,20 @@
     .new-section{
         margin-top:20px
     }
+
+    .progress-bar-container{
+        height: 5px;
+        margin-bottom: 5px;
+        
+    }
+
+    .custom-progress-bar{
+        height: 5px;
+        
+    }
+
+    .custom-progress-bar .progress-bar{
+        background-color: #5b1680;
+    }
+
 </style>

@@ -8,7 +8,7 @@
  * Controller of the caboFrontendApp
  */
 angular.module('caboFrontendApp')
-  .controller('GameroomCtrl', function ($scope, $rootScope, $routeParams, GameRoomService, PlayerProfileService, $http, $uibModal, $timeout, $location) {
+  .controller('GameroomCtrl', function ($scope, $rootScope, $routeParams, GameRoomService, PlayerProfileService, $http, $uibModal, $timeout, $location, $interval) {
     $scope.player = null;
     $scope.gameStatus = "";
     $scope.isOwner = false;
@@ -61,12 +61,13 @@ angular.module('caboFrontendApp')
       $scope.currentPlayer = board_data.current_player;
       $scope.gameStatus = board_data.game_status;
 
+      // if no more cards left, find the winner
       if(($scope.cardsOnDeck == undefined || $scope.cardsOnDeck.length == 0) && $scope.gameStatus == 'game__started'){
-        console.log("finding winner");
         $scope.findWinner();
       }
+
+      // if game already completed, show the score card
       if($scope.gameStatus == 'completed'){
-        console.log("game completed");
         var scoreCardModal = $uibModal.open({
           animation : true,
           templateUrl: '/views/components/scoreCardModal.html',
@@ -79,24 +80,33 @@ angular.module('caboFrontendApp')
             }
         });
 
+        // after score card, go to home screen
         scoreCardModal.result.then(function(){
           $location.path("/");
         }, function(){
           $location.path("/");
         });
+
       }else if($scope.gameStatus == 'cabo_called' && $scope.playerStatus[$scope.player.uuid].last_chance && $scope.currentPlayer == $scope.player.uuid){
-        console.log("finding winner");
+        // if cabo called and last player, find the winner
         $scope.findWinner();
       }else{
         $scope.playedCards = board_data.played_cards;
         $scope.playerOrder = board_data.player_order;
         
         if ($scope.playedCards[$scope.playedCards.length - 1] != 'XX') {
+          // find the last played card
           $scope.lastPlayedCard = $rootScope.cards[$scope.playedCards[$scope.playedCards.length - 1]];
         }
         $scope.myStatus = $scope.playerStatus[$scope.player.uuid];
         if($scope.myStatus.initial_cards_viewed <2){
           $scope.viewFirstCards = true;
+          $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              $scope.updateInitialCardsViewed();
+            }
+          }, 15100);
         }else{
           $scope.viewFirstCards = false;
         }
@@ -114,6 +124,12 @@ angular.module('caboFrontendApp')
         $scope.applying_board = false;
         if($scope.currentPlayer == $scope.player.uuid && $scope.gameStatus == 'game_started' || $scope.gameStatus == 'cabo_called'){
           $scope.myChance = true;
+          $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              $scope.updateCurrentPlayer($scope.findNextPlayer());
+            }
+          }, 15100);
         }
         $scope.$apply();
       }
@@ -138,9 +154,15 @@ angular.module('caboFrontendApp')
     $scope.popCard = function () {
       if ($scope.currentPlayer == $scope.player.uuid && $scope.myChance) {
         if($scope.popedCard == null) {
+          $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              console.log("timed out, throwing card"); 
+              $scope.useCard('throw');
+            }
+          }, 15100);
           $scope.popedCard = $rootScope.cards[$scope.cardsOnDeck.pop()];
           $scope.showPopedCard = true;
-          console.log($rootScope.cards[$scope.popedCard]);
           if ($rootScope.powerCards.indexOf($scope.popedCard.code) > -1) {
             $scope.isPowerCard = true;
           } else {
@@ -158,6 +180,12 @@ angular.module('caboFrontendApp')
       'swap': function () {
         $scope.enableSelectingCard = true;
         $scope.actionOnSelect = 'swap';
+        $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              $scope.useCard('throw');
+            }
+          }, 15100);
       },
       'throw': function () {
         $scope.playedCards.push($scope.popedCard.code);
@@ -176,16 +204,34 @@ angular.module('caboFrontendApp')
         if ($scope.popedCard.power == 1) {
           $scope.enableSelectingCard = true;
           $scope.actionOnSelect = 'see_mine';
+          $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              $scope.useCard('throw');
+            }
+          }, 15100);
         } else if ($scope.popedCard.power == 2) {
           $scope.actionOnSelect = 'see_others';
           // find the player for see next
           $scope.enableSelectingCard = true;
           $scope.targetPlayer = $scope.findNextPlayer();
+          $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              $scope.useCard('throw');
+            }
+          }, 15100);
         } else {
           $scope.actionOnSelect = 'add_for_exchange';
           $scope.targetPlayer = $scope.findNextPlayer();
           $scope.cards_to_swap = [];
           $scope.positions_to_swap = [];
+          $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              $scope.useCard('throw');
+            }
+          }, 15100);
           // find the player coming next
         }
         $scope.popedCard = null;
@@ -202,12 +248,33 @@ angular.module('caboFrontendApp')
       }
     }
 
+    $scope.updateInitialCardsViewed = function(){
+      $scope.myStatus.initial_cards_viewed+=1;
+      $scope.updates = {};
+      $scope.updates['player_status/' + $scope.player.uuid + '/initial_cards_viewed'] = $scope.myStatus.initial_cards_viewed;
+      if($scope.myStatus.initial_cards_viewed == 2){
+        $scope.viewFirstCards = false;
+        if($scope.gameStatus == 'waiting_for_ready'){
+          var update_flag = true;
+          for(var each_uuid in $scope.playerStatus){
+            if($scope.playerStatus[each_uuid].initial_cards_viewed < 2){
+              update_flag = false;
+            }
+          }
+          if(update_flag){
+            $scope.updates['game_status'] = 'game_started';
+            $scope.firebase.update($scope.updates);
+          }
+        }
+      }
+      $scope.firebase.update($scope.updates);
+    };
+
     $scope.selectCard = function (selectedCard, cardPosition = null) {
       $scope.enableSelectingCard = false;
-
+      $scope.actionTaken = true;
       if($scope.viewFirstCards == true){
-        console.log("viewing initial cards")
-        $scope.myStatus.initial_cards_viewed+=1;
+        $scope.updateInitialCardsViewed();
         var cardModal = $uibModal.open({
           animation : true,
           templateUrl: '/views/components/showCardModal.html',
@@ -219,30 +286,6 @@ angular.module('caboFrontendApp')
               }
             }
         });
-        $scope.updates = {};
-        $scope.updates['player_status/' + $scope.player.uuid + '/initial_cards_viewed'] = $scope.myStatus.initial_cards_viewed;
-        console.log($scope.myStatus)
-        if($scope.myStatus.initial_cards_viewed == 2){
-          $scope.viewFirstCards = false;
-          
-          console.log($scope.playerStatus);
-          if($scope.gameStatus == 'waiting_for_ready'){
-            var update_flag = true;
-            for(var each_uuid in $scope.playerStatus){
-              if($scope.playerStatus[each_uuid].initial_cards_viewed < 2){
-                console.log("is false");
-                update_flag = false;
-              }
-            }
-            console.log($scope.update_flag);
-            if(update_flag){
-              console.log("updating flag");
-              $scope.updates['game_status'] = 'game_started';
-              $scope.firebase.update($scope.updates);
-            }
-          }
-        }
-        $scope.firebase.update($scope.updates);
       }else{
         if ($scope.actionOnSelect == 'swap') {
           $scope.playedCards.push(selectedCard);
@@ -250,11 +293,10 @@ angular.module('caboFrontendApp')
           $scope.updates['player_status/' + $scope.player.uuid + '/cards'] = $scope.playerCards;
           $scope.runCallCaboTimer($scope.findNextPlayer());
           $scope.playerCards[cardPosition] = $scope.popedCard.code;
-          
-  
           $scope.firebase.update($scope.updates);
           $scope.popedCard = null;
           $scope.showPopedCard = false;
+          $scope.runActionTimer();
         } else if ($scope.actionOnSelect == 'see_mine') {
           var cardModal = $uibModal.open({
             animation: true,
@@ -286,6 +328,12 @@ angular.module('caboFrontendApp')
           if($scope.cards_to_swap.length == 0){
             $scope.cards_to_swap.push(selectedCard);
             $scope.positions_to_swap.push(cardPosition);
+            $scope.runActionTimer();
+          $timeout(function(){
+            if($scope.timeout){
+              $scope.updateCurrentPlayer($scope.findNextPlayer());
+            }
+          }, 15100);
           }else if($scope.cards_to_swap.length == 1){
             $scope.cards_to_swap.push(selectedCard);
             $scope.positions_to_swap.push(cardPosition);
@@ -306,6 +354,7 @@ angular.module('caboFrontendApp')
 
     $scope.useCard = function (actionName) {
       if (actionName.length) {
+        $scope.actionTaken = true;
         $scope.cardActions[actionName]();
       }
     };
@@ -363,6 +412,20 @@ angular.module('caboFrontendApp')
       }
       
     }
+
+    $scope.runActionTimer = function(){
+      $scope.secondsRemaining = 15000;
+      $scope.timeout = false;
+      $scope.actionTaken = false;
+      $interval.cancel($scope.timer);
+      $scope.timer = $interval(function(){
+        $scope.secondsRemaining-=125;
+        if($scope.secondsRemaining == 0 && $scope.actionTaken == false){
+          $scope.timeout = true;
+          $interval.cancel($scope.timer);
+        }
+      }, 125);
+    };
   });
 
 

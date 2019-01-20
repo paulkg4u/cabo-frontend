@@ -8,26 +8,24 @@
  * Controller of the caboFrontendApp
  */
 angular.module('caboFrontendApp')
-  .controller('MainCtrl', function (OAuth, $location, $rootScope, $http, $scope, PlayerProfileService) {
+  .controller('MainCtrl', function (OAuth, $location, $rootScope, $http, $scope, PlayerProfileService, OAuthToken) {
     $scope.displayActions = true;
     $scope.displayJoinRoom = false;
     $scope.roomID = "";
     console.log(OAuth.isAuthenticated());
 
     PlayerProfileService.getPlayerProfile().then(function successCallBack(response) {
-      $scope.player = response;
-      if ($scope.player) {
-        $scope.playerFetch = "";
+      $rootScope.player = response;
+      if ($rootScope.player) {
+        $rootScope.playerFetch = "";
       }
     }, function errorCallBack(error) {
       console.log("could not fetch profile")
     })
 
     if(OAuth.isAuthenticated() ==false){
-      console.log("not authenticated");
       $location.path("/signIn" );
     }else{
-      console.log("authenticated");
       $rootScope.isAuthenticated = true;
     }
     
@@ -63,11 +61,22 @@ angular.module('caboFrontendApp')
           'room_id' : $scope.roomID 
         }
       }).then(function successCallback(response){
-        console.log(response);
+        
         $scope.data = response.data;
         $location.path('/gameroom/'+$scope.data.uuid);
       }, function errorCallback(error){
         console.log(error);
       });
     }
+
+    $rootScope.signOut = function(){
+      console.log("signout");
+      OAuthToken.removeToken();
+        $rootScope.$storage.token = '';
+        OAuth.revokeToken().then(function() {
+          $location.path("/signIn" );
+        }, function() {
+          $location.path("/signIn" );
+        });
+    };
   });

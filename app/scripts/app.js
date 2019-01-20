@@ -40,6 +40,7 @@ caboApp.config(['OAuthProvider', 'OAuthTokenProvider', function (OAuthProvider, 
 }]);
 
 caboApp.run(function ($rootScope, $localStorage, ) {
+    $rootScope.isAuthenticated = false;
     $rootScope.$storage = $localStorage;
     $rootScope.baseURL = "http://localhost:8000/";
     $rootScope.gameroomURL = "https://cabo-1cd87.firebaseio.com/";

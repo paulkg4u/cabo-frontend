@@ -119,3 +119,42 @@ body {
     border-radius: 10px;
   }
 }
+
+.custom-navbar{
+  color: white;
+  font-weight: 500;
+  margin-right: 20px;
+}
+
+.custom-navbar:hover{
+  color: white;
+}
+
+.custom-navbar li .btn, .custom-navbar li .btn:hover {
+  cursor:pointer;
+  height: 40px;
+  line-height: 40px;
+  background-color: none;
+  color: white
+}
+
+.dropdown-menu{
+    background-color: #cccccc;
+    border-radius: 0;
+    color: #cea93f;
+    border: none;
+    box-shadow: none;
+}
+
+.dropdown-menu > li > a, .dropdown-menu > li > a:hover{
+  color: #cea93f !important;
+  background: none;
+  text-align: right;
+  cursor: pointer;
+}
+
+.dropdown-menu a:hover{
+  font-weight: bold;
+}
+
+
