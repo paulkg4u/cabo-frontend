@@ -18,7 +18,8 @@ var caboApp = angular
         'ngTouch',
         'ngStorage',
         'angular-oauth2',
-        'ui.bootstrap'
+        'ui.bootstrap',
+        'oc.lazyLoad'
     ]);
 
 
@@ -38,7 +39,31 @@ caboApp.config(['OAuthProvider', 'OAuthTokenProvider', function (OAuthProvider, 
         }
     });
 }]);
-
+caboApp.config(['$ocLazyLoadProvider', function($ocLazyLoadProvider) {
+    $ocLazyLoadProvider.config({
+        modules:[{
+            name:'CardImages',
+            files:['https://deckofcardsapi.com/static/img/0D.png', 'https://deckofcardsapi.com/static/img/5S.png', 'https://deckofcardsapi.com/static/img/JS.png',
+                'https://deckofcardsapi.com/static/img/JH.png', 'https://deckofcardsapi.com/static/img/5H.png', 'https://deckofcardsapi.com/static/img/JD.png', 
+                'https://deckofcardsapi.com/static/img/5D.png', 'https://deckofcardsapi.com/static/img/0H.png', 'https://deckofcardsapi.com/static/img/5C.png', 
+                'https://deckofcardsapi.com/static/img/JC.png', 'https://deckofcardsapi.com/static/img/9H.png', 'https://deckofcardsapi.com/static/img/9C.png', 
+                'https://deckofcardsapi.com/static/img/9D.png', 'https://deckofcardsapi.com/static/img/9S.png', 'https://deckofcardsapi.com/static/img/2S.png', 
+                'https://deckofcardsapi.com/static/img/QS.png', 'https://deckofcardsapi.com/static/img/2D.png', 'https://deckofcardsapi.com/static/img/2C.png', 
+                'https://deckofcardsapi.com/static/img/2H.png', 'https://deckofcardsapi.com/static/img/KC.png', 'https://deckofcardsapi.com/static/img/6C.png', 
+                'https://deckofcardsapi.com/static/img/6D.png', 'https://deckofcardsapi.com/static/img/KD.png', 'https://deckofcardsapi.com/static/img/6H.png', 
+                'https://deckofcardsapi.com/static/img/KH.png', 'https://deckofcardsapi.com/static/img/KS.png', 'https://deckofcardsapi.com/static/img/6S.png', 
+                'https://deckofcardsapi.com/static/img/3S.png', 'https://deckofcardsapi.com/static/img/3H.png', 'https://deckofcardsapi.com/static/img/3C.png', 
+                'https://deckofcardsapi.com/static/img/3D.png', 'https://deckofcardsapi.com/static/img/7D.png', 'https://deckofcardsapi.com/static/img/7C.png', 
+                'https://deckofcardsapi.com/static/img/7H.png', 'https://deckofcardsapi.com/static/img/7S.png', 'https://deckofcardsapi.com/static/img/0S.png', 
+                'https://deckofcardsapi.com/static/img/AC.png', 'https://deckofcardsapi.com/static/img/aceDiamonds.png', 
+                'https://deckofcardsapi.com/static/img/AH.png', 'https://deckofcardsapi.com/static/img/4S.png', 
+                'https://deckofcardsapi.com/static/img/0C.png', 'https://deckofcardsapi.com/static/img/AS.png', 'https://deckofcardsapi.com/static/img/4H.png', 
+                'https://deckofcardsapi.com/static/img/8S.png', 'https://deckofcardsapi.com/static/img/4D.png', 'https://deckofcardsapi.com/static/img/4C.png', 
+                'https://deckofcardsapi.com/static/img/8H.png', 'https://deckofcardsapi.com/static/img/8C.png', 'https://deckofcardsapi.com/static/img/8D.png', 
+                'https://deckofcardsapi.com/static/img/QC.png', 'https://deckofcardsapi.com/static/img/QD.png', 'https://deckofcardsapi.com/static/img/QH.png']
+        }]
+    });
+}]);
 caboApp.run(function ($rootScope, $localStorage, ) {
     $rootScope.isAuthenticated = false;
     $rootScope.$storage = $localStorage;
@@ -54,7 +79,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '0D',
             'value': '10',
             'suit': 'DIAMONDS',
-            'power' : 2
+            'power': 2
         },
         '3S': {
             'images': {
@@ -95,7 +120,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'JS',
             'value': 'JACK',
             'suit': 'SPADES',
-            'power' : 3
+            'power': 3
         },
         'JD': {
             'images': {
@@ -106,7 +131,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'JD',
             'value': 'JACK',
             'suit': 'DIAMONDS',
-            'power' : 3
+            'power': 3
         },
         '3H': {
             'images': {
@@ -127,7 +152,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'JH',
             'value': 'JACK',
             'suit': 'HEARTS',
-            'power' : 3
+            'power': 3
         },
         '5H': {
             'images': {
@@ -198,7 +223,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '9H',
             'value': '9',
             'suit': 'HEARTS',
-            'power' : 2
+            'power': 2
         },
         '7D': {
             'images': {
@@ -209,7 +234,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '7D',
             'value': '7',
             'suit': 'DIAMONDS',
-            'power' : 1
+            'power': 1
         },
         '7C': {
             'images': {
@@ -220,7 +245,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '7C',
             'value': '7',
             'suit': 'CLUBS',
-            'power' : 1
+            'power': 1
         },
         '9C': {
             'images': {
@@ -231,7 +256,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '9C',
             'value': '9',
             'suit': 'CLUBS',
-            'power' : 2
+            'power': 2
         },
         '9D': {
             'images': {
@@ -242,7 +267,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '9D',
             'value': '9',
             'suit': 'DIAMONDS',
-            'power' : 2
+            'power': 2
         },
         '7H': {
             'images': {
@@ -253,7 +278,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '7H',
             'value': '7',
             'suit': 'HEARTS',
-            'power' : 1
+            'power': 1
         },
         '7S': {
             'images': {
@@ -264,7 +289,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '7S',
             'value': '7',
             'suit': 'SPADES',
-            'power' : 1
+            'power': 1
         },
         '9S': {
             'images': {
@@ -275,7 +300,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '9S',
             'value': '9',
             'suit': 'SPADES',
-            'power' : 2
+            'power': 2
         },
         'JC': {
             'images': {
@@ -286,7 +311,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'JC',
             'value': 'JACK',
             'suit': 'CLUBS',
-            'power' : 3
+            'power': 3
         },
         '0S': {
             'images': {
@@ -297,7 +322,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '0S',
             'value': '10',
             'suit': 'SPADES',
-            'power' : 2
+            'power': 2
         },
         'AC': {
             'images': {
@@ -368,7 +393,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '0C',
             'value': '10',
             'suit': 'CLUBS',
-            'power' : 2
+            'power': 2
         },
         'AS': {
             'images': {
@@ -399,8 +424,8 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'QH',
             'value': 'QUEEN',
             'suit': 'HEARTS',
-            'power' : 3,
-            
+            'power': 3,
+
         },
         '8H': {
             'images': {
@@ -411,7 +436,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '8H',
             'value': '8',
             'suit': 'HEARTS',
-            'power' : 1
+            'power': 1
         },
         '0H': {
             'images': {
@@ -422,7 +447,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '0H',
             'value': '10',
             'suit': 'HEARTS',
-            'power' : 2
+            'power': 2
         },
         '2H': {
             'images': {
@@ -463,7 +488,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'QS',
             'value': 'QUEEN',
             'suit': 'SPADES',
-            'power' : 3
+            'power': 3
         },
         '6C': {
             'images': {
@@ -514,7 +539,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '8C',
             'value': '8',
             'suit': 'CLUBS',
-            'power' : 1
+            'power': 1
         },
         'KH': {
             'images': {
@@ -535,7 +560,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '8D',
             'value': '8',
             'suit': 'DIAMONDS',
-            'power' : 1
+            'power': 1
         },
         'KS': {
             'images': {
@@ -556,7 +581,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'QC',
             'value': 'QUEEN',
             'suit': 'CLUBS',
-            'power' : 3
+            'power': 3
         },
         '6S': {
             'images': {
@@ -577,7 +602,7 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': 'QD',
             'value': 'QUEEN',
             'suit': 'DIAMONDS',
-            'power' : 3
+            'power': 3
         },
         '8S': {
             'images': {
@@ -588,14 +613,34 @@ caboApp.run(function ($rootScope, $localStorage, ) {
             'code': '8S',
             'value': '8',
             'suit': 'SPADES',
-            'power' : 1
+            'power': 1
         }
     };
 
-    $rootScope.powerCards = ['7S','8S', '9S','0S', 'JS', 'QS',
-                            '7C','8C', '9C','0C', 'JC', 'QC' ,
-                            '7D','8D', '9D','0D', 'JD','QD',
-                            '7H','8H', '9H','0H', 'JH', 'QH'];
+    $rootScope.powerCards = ['7S', '8S', '9S', '0S', 'JS', 'QS',
+        '7C', '8C', '9C', '0C', 'JC', 'QC',
+        '7D', '8D', '9D', '0D', 'JD', 'QD',
+        '7H', '8H', '9H', '0H', 'JH', 'QH'];
+
+    $rootScope.cardImages = ['https://deckofcardsapi.com/static/img/0D.png', 'https://deckofcardsapi.com/static/img/5S.png', 'https://deckofcardsapi.com/static/img/JS.png',
+                             'https://deckofcardsapi.com/static/img/JH.png', 'https://deckofcardsapi.com/static/img/5H.png', 'https://deckofcardsapi.com/static/img/JD.png', 
+                             'https://deckofcardsapi.com/static/img/5D.png', 'https://deckofcardsapi.com/static/img/0H.png', 'https://deckofcardsapi.com/static/img/5C.png', 
+                             'https://deckofcardsapi.com/static/img/JC.png', 'https://deckofcardsapi.com/static/img/9H.png', 'https://deckofcardsapi.com/static/img/9C.png', 
+                             'https://deckofcardsapi.com/static/img/9D.png', 'https://deckofcardsapi.com/static/img/9S.png', 'https://deckofcardsapi.com/static/img/2S.png', 
+                             'https://deckofcardsapi.com/static/img/QS.png', 'https://deckofcardsapi.com/static/img/2D.png', 'https://deckofcardsapi.com/static/img/2C.png', 
+                             'https://deckofcardsapi.com/static/img/2H.png', 'https://deckofcardsapi.com/static/img/KC.png', 'https://deckofcardsapi.com/static/img/6C.png', 
+                             'https://deckofcardsapi.com/static/img/6D.png', 'https://deckofcardsapi.com/static/img/KD.png', 'https://deckofcardsapi.com/static/img/6H.png', 
+                             'https://deckofcardsapi.com/static/img/KH.png', 'https://deckofcardsapi.com/static/img/KS.png', 'https://deckofcardsapi.com/static/img/6S.png', 
+                             'https://deckofcardsapi.com/static/img/3S.png', 'https://deckofcardsapi.com/static/img/3H.png', 'https://deckofcardsapi.com/static/img/3C.png', 
+                             'https://deckofcardsapi.com/static/img/3D.png', 'https://deckofcardsapi.com/static/img/7D.png', 'https://deckofcardsapi.com/static/img/7C.png', 
+                             'https://deckofcardsapi.com/static/img/7H.png', 'https://deckofcardsapi.com/static/img/7S.png', 'https://deckofcardsapi.com/static/img/0S.png', 
+                             'https://deckofcardsapi.com/static/img/AC.png', 'https://deckofcardsapi.com/static/img/aceDiamonds.png', 
+                             'https://deckofcardsapi.com/static/img/AH.png', 'https://deckofcardsapi.com/static/img/4S.png', 
+                             'https://deckofcardsapi.com/static/img/0C.png', 'https://deckofcardsapi.com/static/img/AS.png', 'https://deckofcardsapi.com/static/img/4H.png', 
+                             'https://deckofcardsapi.com/static/img/8S.png', 'https://deckofcardsapi.com/static/img/4D.png', 'https://deckofcardsapi.com/static/img/4C.png', 
+                             'https://deckofcardsapi.com/static/img/8H.png', 'https://deckofcardsapi.com/static/img/8C.png', 'https://deckofcardsapi.com/static/img/8D.png', 
+                             'https://deckofcardsapi.com/static/img/QC.png', 'https://deckofcardsapi.com/static/img/QD.png', 'https://deckofcardsapi.com/static/img/QH.png']
+
 
 });
 caboApp.config(function ($routeProvider) {

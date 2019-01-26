@@ -8,7 +8,7 @@
  * Controller of the caboFrontendApp
  */
 angular.module('caboFrontendApp')
-  .controller('MainCtrl', function (OAuth, $location, $rootScope, $http, $scope, PlayerProfileService, OAuthToken) {
+  .controller('MainCtrl', function (OAuth, $location, $rootScope, $http, $scope, PlayerProfileService, OAuthToken,$ocLazyLoad) {
     $scope.displayActions = true;
     $scope.displayJoinRoom = false;
     $scope.roomID = "";
@@ -38,9 +38,12 @@ angular.module('caboFrontendApp')
 
         }
       }).then(function successCallback(response){
-        console.log(response);
         $scope.data = response.data;
         $location.path('/gameroom/'+$scope.data.uuid);
+        // $ocLazyLoad.load($rootScope.cardImages).then(function(){
+          
+        // });
+        
       }, function errorCallback(response){
         console.log(response);
       }); 
@@ -61,9 +64,11 @@ angular.module('caboFrontendApp')
           'room_id' : $scope.roomID 
         }
       }).then(function successCallback(response){
-        
         $scope.data = response.data;
         $location.path('/gameroom/'+$scope.data.uuid);
+        // $ocLazyLoad.load('CardImages').then(function(){
+          
+        // });
       }, function errorCallback(error){
         console.log(error);
       });

@@ -51,7 +51,59 @@ angular.module('caboFrontendApp')
 
 
     $scope.googleSignIn = function () {
+      $scope.googleSignInClicked = true;
+        if($scope.googleAccountDetails != null){
+            $scope.authenticateGoogleUser();
+        }else{
+            googleAuth = gapi.auth2.getAuthInstance();
+            googleAuth.signIn();
+        }
+    }
+
+    $scope.googleSignInClicked = false;
+    var googleAuth;
+    $scope.googleAccountDetails = null;
+    gapi.load('auth2', function () {
+        gapi.auth2.init({'client_id': '338150241996-ao6ts4cgs1ib85ttuv6mubslb0244tso.apps.googleusercontent.com'}).then(function successinit(auth2) {
+            googleAuth = gapi.auth2.getAuthInstance();
+            googleAuth.isSignedIn.listen(getGoogleUser);
+            if (auth2.isSignedIn.get()) {
+                var googleUser = auth2.currentUser.get();
+                console.log(auth2);
+                onSignIn(googleUser);
+                // auth2.signOut();
+
+            }
+        });
+    });
+
+    function onSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        var authDetails = googleUser.getAuthResponse();
+        $scope.googleAccountDetails = googleUser;
+        if ($scope.googleSignInClicked) {
+            for (var eachObject in googleUser){
+                if(googleUser[eachObject].hasOwnProperty('access_token')){
+                    $scope.getConvertToken('google-plus', googleUser[eachObject].access_token);        
+                }
+            };
+            
+        }
 
     }
 
+    var getGoogleUser = function (isSignedIn) {
+        if (isSignedIn) {
+            var googleUser = googleAuth.currentUser.get();
+            onSignIn(googleUser);
+        }
+    };
+
+    $scope.authenticateGoogleUser  =function(){
+        for (var eachObject in $scope.googleAccountDetails){
+            if($scope.googleAccountDetails[eachObject].hasOwnProperty('access_token')){
+                $scope.getConvertToken('google-plus', $scope.googleAccountDetails[eachObject].access_token);        
+            }
+        };
+    };
   });
