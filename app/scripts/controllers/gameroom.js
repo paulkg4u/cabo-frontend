@@ -16,6 +16,7 @@ angular.module('caboFrontendApp')
     $scope.applying_board = false;
     $scope.showFirstCards = false;
     $scope.myChance = false;
+    $scope.timerRunning = false;
     $scope.gameStatusDict = {
       'waiting_for_ready':"View Initial Cards",
       'game_started' :  "Game Started",
@@ -99,7 +100,7 @@ angular.module('caboFrontendApp')
           $scope.lastPlayedCard = $rootScope.cards[$scope.playedCards[$scope.playedCards.length - 1]];
         }
         $scope.myStatus = $scope.playerStatus[$scope.player.uuid];
-        if($scope.myStatus.initial_cards_viewed <2){
+        if($scope.myStatus.initial_cards_viewed <2 && $scope.gameStatus != 'not_started'){
           $scope.viewFirstCards = true;
           $scope.runActionTimer();
           $timeout(function(){
@@ -176,6 +177,14 @@ angular.module('caboFrontendApp')
 
     };
 
+    $scope.updateEvent = function(){
+      $scope.newPostKey = $scope.firebase.child('events').push().key;
+      $scope.firebase.child('events/'+$scope.newPostKey)
+      $scope.updates = {};
+      $scope.updates['events/' + $scope.newPostKey] = $scope.eventContent;
+      $scope.firebase.update($scope.updates);
+    };
+
     $scope.cardActions = {
       'swap': function () {
         $scope.enableSelectingCard = true;
@@ -195,6 +204,8 @@ angular.module('caboFrontendApp')
         $scope.firebase.update($scope.updates);
         $scope.popedCard = null;
         $scope.showPopedCard = false;
+        $scope.eventContent = "Throwed away";
+        $scope.updateEvent();
       },
       'usePower': function () {
         $scope.playedCards.push($scope.popedCard.code);
@@ -297,6 +308,8 @@ angular.module('caboFrontendApp')
           $scope.popedCard = null;
           $scope.showPopedCard = false;
           $scope.runActionTimer();
+          $scope.eventContent = "swapped his card";
+          $scope.updateEvent();
         } else if ($scope.actionOnSelect == 'see_mine') {
           var cardModal = $uibModal.open({
             animation: true,
@@ -310,6 +323,8 @@ angular.module('caboFrontendApp')
             }
           });
           $scope.runCallCaboTimer($scope.findNextPlayer());
+          $scope.eventContent = "viewed own card";
+          $scope.updateEvent();
         } else if ($scope.actionOnSelect == 'see_others') {
           $scope.runCallCaboTimer($scope.targetPlayer);
           $scope.targetPlayer = null;
@@ -324,16 +339,18 @@ angular.module('caboFrontendApp')
               }
             }
           });
+          $scope.eventContent = "viewed another card";
+          $scope.updateEvent();
         }else if ($scope.actionOnSelect == 'add_for_exchange'){
           if($scope.cards_to_swap.length == 0){
             $scope.cards_to_swap.push(selectedCard);
             $scope.positions_to_swap.push(cardPosition);
             $scope.runActionTimer();
-          $timeout(function(){
-            if($scope.timeout){
-              $scope.updateCurrentPlayer($scope.findNextPlayer());
-            }
-          }, 15100);
+            $timeout(function(){
+              if($scope.timeout){
+                $scope.updateCurrentPlayer($scope.findNextPlayer());
+              }
+            }, 15100);
           }else if($scope.cards_to_swap.length == 1){
             $scope.cards_to_swap.push(selectedCard);
             $scope.positions_to_swap.push(cardPosition);
@@ -345,7 +362,8 @@ angular.module('caboFrontendApp')
             $scope.updates['player_status/' + $scope.targetPlayer + '/cards'] =  $scope.playerStatus[$scope.targetPlayer].cards;
             $scope.runCallCaboTimer($scope.targetPlayer);
             $scope.firebase.update($scope.updates);
-  
+            $scope.eventContent = "swapped cards with ";
+            $scope.updateEvent();
           }
         }
       }
@@ -414,6 +432,7 @@ angular.module('caboFrontendApp')
     }
 
     $scope.runActionTimer = function(){
+      $scope.timerRunning = true;
       $scope.secondsRemaining = 15000;
       $scope.timeout = false;
       $scope.actionTaken = false;
@@ -423,6 +442,7 @@ angular.module('caboFrontendApp')
         if($scope.secondsRemaining == 0 && $scope.actionTaken == false){
           $scope.timeout = true;
           $interval.cancel($scope.timer);
+          $scope.timerRunning = false;
         }
       }, 125);
     };

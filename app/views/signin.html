@@ -6,7 +6,7 @@
             <img class = "logo" src="/assets/img/logo.png" style="height:120px;">  
             <br>
         <span class = "h4">
-                Hi, Welcome to play Cabo
+                Hi, Welcome to Play Cabo
         </span>
         
         <br>
@@ -30,12 +30,12 @@
                         <div class="g-signin2" data-onsuccess="onSignIn"></div>
                     </div>
                 </div>
-                <div class = "row" style = "margin-top:5px;">
+                <!-- <div class = "row" style = "margin-top:5px;">
                         <div class = "col-md-12">
                             <button type = "button" class = "col-md-12 btn btn-info" ng-click = "googleSignIn()">Continue as  Guest</button>
                             <div class="g-signin2" data-onsuccess="onSignIn"></div>
                         </div>
-                    </div>
+                    </div> -->
     </div>
     
 </div>
@@ -53,6 +53,8 @@
     padding: 20px;
     border: 5px solid #cea93f;
     border-radius: 10px;
+    display: flex;
+    flex-direction: column;
     }
 
     .btn-facebook {
@@ -72,7 +74,7 @@
         height: 50%;
     }
 
-.btn:hover{
+.btn:hover, .btn:focus{
     color: white;
     font-weight: bold;
 }
