@@ -21,7 +21,7 @@ angular.module('caboFrontendApp')
       'waiting_for_ready':"View Initial Cards",
       'game_started' :  "Game Started",
       'not_started' : "Waiting For Players",
-      'cabo_called' : "Cabo Called",
+      'cabo_called' : "Cabo Called",  
       'your_chance' : "Your Status",
       'completed' : 'Game Over'
     };
@@ -53,7 +53,6 @@ angular.module('caboFrontendApp')
     }
 
     $scope.refreshBoard = function (board_data) {
-      
       $scope.playerCards = board_data.player_status[$scope.player.uuid].cards;
       $scope.playerInfo = board_data.player_info;
       $scope.playerList = angular.copy($scope.playerInfo);
@@ -100,6 +99,9 @@ angular.module('caboFrontendApp')
           $scope.lastPlayedCard = $rootScope.cards[$scope.playedCards[$scope.playedCards.length - 1]];
         }
         $scope.myStatus = $scope.playerStatus[$scope.player.uuid];
+        if($scope.myStatus.initial_cards_viewed == 2 && $scope.gameStatus == 'waiting_for_ready'){
+          $scope.updateInitialCardsViewed(); 
+        }
         if($scope.myStatus.initial_cards_viewed <2 && $scope.gameStatus != 'not_started'){
           $scope.viewFirstCards = true;
           $scope.runActionTimer();
@@ -260,7 +262,9 @@ angular.module('caboFrontendApp')
     }
 
     $scope.updateInitialCardsViewed = function(){
-      $scope.myStatus.initial_cards_viewed+=1;
+      if($scope.myStatus.initial_cards_viewed < 2){
+        $scope.myStatus.initial_cards_viewed+=1;
+      }
       $scope.updates = {};
       $scope.updates['player_status/' + $scope.player.uuid + '/initial_cards_viewed'] = $scope.myStatus.initial_cards_viewed;
       if($scope.myStatus.initial_cards_viewed == 2){
@@ -397,7 +401,6 @@ angular.module('caboFrontendApp')
       $scope.updates  = {'game_status' : 'cabo_called'};
       $scope.updates['current_player'] = $scope.findNextPlayer();
       $scope.updates['player_status/' + $scope.player.uuid + '/last_chance'] = true;
-      console.log($scope.updates);
       $scope.firebase.update($scope.updates);
     };
 
